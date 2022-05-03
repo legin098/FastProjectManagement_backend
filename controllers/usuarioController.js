@@ -34,7 +34,7 @@ const autenticar = async (req, res) => {
 
   //Comprobar si el usuario esta confirmado
   if (!usuario.confirmado) {
-    const error = new Error("El usuario no esta confirmado");
+    const error = new Error("El usuario no está confirmado");
     return res.status(403).json({ msg: error.message });
   }
 
@@ -56,13 +56,13 @@ const confirmar = async (req, res) => {
   const { token } = req.params;
   const usuarioConfirmar = await Usuario.findOne({ token });
   if (!usuarioConfirmar) {
-    const error = new Error("Token no valido");
+    const error = new Error("Token no válido");
     return res.status(403).json({ msg: error.message });
   }
 
   try {
     usuarioConfirmar.confirmado = true;
-    usuarioConfirmar.token = '';
+    usuarioConfirmar.token = "";
     await usuarioConfirmar.save();
     res.json({ msg: "Usuario confirmado correctamente" });
   } catch (e) {
@@ -70,4 +70,57 @@ const confirmar = async (req, res) => {
   }
 };
 
-export { registrar, autenticar, confirmar };
+const reestablecerPassword = async (req, res) => {
+  const { email } = req.body;
+
+  const usuario = await Usuario.findOne({ email });
+  if (!usuario) {
+    const error = new Error("El usuario no existe");
+    return res.status(404).json({ msg: error.message });
+  }
+
+  try {
+    usuario.token = generarId();
+    await usuario.save();
+    res.json({ msg: "Se ha enviado un email con las instrucciones" });
+  } catch (e) {
+    console.log(e);
+  }
+};
+
+const comprobarToken = async (req, res) => {
+  const { token } = req.params;
+
+  const tokenValido = await Usuario.findOne({ token });
+
+  if (tokenValido) {
+    res.json({ msg: "Token válido y el usuario existe" });
+  } else {
+    const error = new Error("Token no válido");
+    return res.status(404).json({ msg: error.message });
+  }
+};
+
+const nuevoPassword = async (req, res) => {
+  const { token } = req.params;
+  const { password } = req.body;
+
+  const usuario = await Usuario.findOne({ token });
+
+  if (usuario) {
+    usuario.password = password;
+    usuario.token = "";
+
+    try {
+      await usuario.save();
+      res.json({ msg: "Contraseña modificada correctamente" });
+    } catch (e) {
+      console.log(e);
+    }
+  } else {
+    const error = new Error("Token no válido");
+    return res.status(404).json({ msg: error.message });
+  }
+};
+
+export { registrar, autenticar, confirmar, reestablecerPassword, comprobarToken, nuevoPassword };
