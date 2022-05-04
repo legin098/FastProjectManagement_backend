@@ -6,7 +6,7 @@ import {
   eliminarTarea, 
   cambiarEstadoTarea
 } from "../controllers/tareaController.js";
-import { checkAuth } from "../middleware/checkAuth.js";
+import checkAuth from "../middleware/checkAuth.js";
 
 const router = express.Router();
 
