@@ -1,7 +1,7 @@
 import Usuario from "../models/Usuario.js";
 import generarId from "../helpers/generarId.js";
 import generarJWT from "../helpers/generarJWT.js";
-import { emailRegistro } from "../helpers/email.js";
+import { emailRegistro, emailRestablecerPassword } from "../helpers/email.js";
 
 const registrar = async (req, res) => {
   //Evitar registro de usuarios duplicados
@@ -18,7 +18,7 @@ const registrar = async (req, res) => {
     usuario.token = generarId();
     await usuario.save();
 
-    //Enviar email de confirmación
+    //TODO: Enviar email de confirmación
     emailRegistro({
       email: usuario.email,
       nombre: usuario.nombre,
@@ -79,7 +79,7 @@ const confirmar = async (req, res) => {
   }
 };
 
-const reestablecerPassword = async (req, res) => {
+const restablecerPassword = async (req, res) => {
   const { email } = req.body;
 
   const usuario = await Usuario.findOne({ email });
@@ -91,6 +91,14 @@ const reestablecerPassword = async (req, res) => {
   try {
     usuario.token = generarId();
     await usuario.save();
+
+    //TODO: Enviar email con instrucciones
+    emailRestablecerPassword({
+      email: usuario.email,
+      nombre: usuario.nombre,
+      token: usuario.token
+    })
+
     res.json({ msg: "Se ha enviado un email con las instrucciones" });
   } catch (e) {
     console.log(e);
@@ -138,4 +146,4 @@ const perfil = async (req, res) => {
   res.json(usuario);
 };
 
-export { registrar, autenticar, confirmar, reestablecerPassword, comprobarToken, nuevoPassword, perfil };
+export { registrar, autenticar, confirmar, restablecerPassword, comprobarToken, nuevoPassword, perfil };
