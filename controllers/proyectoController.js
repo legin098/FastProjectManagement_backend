@@ -34,13 +34,7 @@ const obtenerProyecto = async (req, res) => {
     return res.status(401).json({ msg: error.message });
   }
 
-  //Obtener las tareas del proyecto
-  const tareas = await Tarea.find().where("proyecto").equals(proyecto._id);
-
-  res.json({
-    proyecto,
-    tareas,
-  });
+  res.json( proyecto );
 };
 
 const editarProyecto = async (req, res) => {
@@ -98,12 +92,12 @@ const agregarColaborador = async (req, res) => {};
 
 const eliminarColaborador = async (req, res) => {};
 
-export { 
-  obtenerProyectos, 
-  nuevoProyecto, 
-  obtenerProyecto, 
-  editarProyecto, 
-  eliminarProyecto, 
-  agregarColaborador, 
-  eliminarColaborador
+export {
+  obtenerProyectos,
+  nuevoProyecto,
+  obtenerProyecto,
+  editarProyecto,
+  eliminarProyecto,
+  agregarColaborador,
+  eliminarColaborador,
 };
