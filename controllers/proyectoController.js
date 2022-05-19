@@ -22,7 +22,7 @@ const nuevoProyecto = async (req, res) => {
 const obtenerProyecto = async (req, res) => {
   const { id } = req.params;
 
-  const proyecto = await Proyecto.findById(id).populate("tareas");
+  const proyecto = await Proyecto.findById(id).populate("tareas").populate("colaboradores", "nombre email");
 
   if (!proyecto) {
     const error = new Error("Proyecto no encontrado");
@@ -34,7 +34,7 @@ const obtenerProyecto = async (req, res) => {
     return res.status(401).json({ msg: error.message });
   }
 
-  res.json( proyecto );
+  res.json(proyecto);
 };
 
 const editarProyecto = async (req, res) => {
@@ -108,7 +108,7 @@ const agregarColaborador = async (req, res) => {
     return res.status(404).json({ msg: error.message });
   }
 
-  if(proyecto.creador.toString() !== req.usuario._id.toString()) {
+  if (proyecto.creador.toString() !== req.usuario._id.toString()) {
     const error = new Error("Acción No Válida");
     return res.status(401).json({ msg: error.message });
   }
@@ -121,12 +121,12 @@ const agregarColaborador = async (req, res) => {
     return res.status(404).json({ msg: error.message });
   }
 
-  if(proyecto.creador.toString() === usuario._id.toString()) {
+  if (proyecto.creador.toString() === usuario._id.toString()) {
     const error = new Error("No puedes agregarte a ti mismo");
     return res.status(401).json({ msg: error.message });
   }
 
-  if(proyecto.colaboradores.includes(usuario._id)) {
+  if (proyecto.colaboradores.includes(usuario._id)) {
     const error = new Error("El usuario ya es colaborador");
     return res.status(401).json({ msg: error.message });
   }
@@ -136,7 +136,23 @@ const agregarColaborador = async (req, res) => {
   res.json({ msg: "Colaborador Agregado" });
 };
 
-const eliminarColaborador = async (req, res) => {};
+const eliminarColaborador = async (req, res) => {
+  const proyecto = await Proyecto.findById(req.params.id);
+
+  if(!proyecto){
+    const error = new Error("Proyecto No Encontrado");
+    return res.status(404).json({ msg: error.message });
+  }
+
+  if(proyecto.creador.toString() !== req.usuario._id.toString()){
+    const error = new Error("Acción No Válida");
+    return res.status(401).json({ msg: error.message });
+  }
+
+  proyecto.colaboradores.pull(req.body.id);
+  await proyecto.save();
+  res.json({ msg: "Colaborador Eliminado" });
+};
 
 export {
   obtenerProyectos,
