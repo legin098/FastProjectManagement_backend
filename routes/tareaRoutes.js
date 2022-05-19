@@ -18,6 +18,6 @@ router
   .put(checkAuth, actualizarTarea)
   .delete(checkAuth, eliminarTarea);
 
-router.put("/cambiar-estado/:id", checkAuth, cambiarEstadoTarea);
+router.post("/estado/:id", checkAuth, cambiarEstadoTarea);
 
 export default router;
