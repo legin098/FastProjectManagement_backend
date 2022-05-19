@@ -2,7 +2,13 @@ import Proyecto from "../models/Proyecto.js";
 import Usuario from "../models/Usuario.js";
 
 const obtenerProyectos = async (req, res) => {
-  const proyectos = await Proyecto.find().where("creador").equals(req.usuario).select("-tareas");
+  const proyectos = await Proyecto.find({
+    $or: [
+      { creador: { $in: req.usuario._id } },
+      { colaboradores: { $in: req.usuario } }
+    ],
+  })
+    .select("-tareas");
 
   res.json(proyectos);
 };
@@ -29,7 +35,7 @@ const obtenerProyecto = async (req, res) => {
     return res.status(404).json({ msg: error.message });
   }
 
-  if (proyecto.creador.toString() !== req.usuario._id.toString()) {
+  if (proyecto.creador.toString() !== req.usuario._id.toString() && !proyecto.colaboradores.some(colaborador => colaborador._id.toString() === req.usuario._id.toString())) {
     const error = new Error("No tienes permisos para ver este proyecto");
     return res.status(401).json({ msg: error.message });
   }
@@ -139,12 +145,12 @@ const agregarColaborador = async (req, res) => {
 const eliminarColaborador = async (req, res) => {
   const proyecto = await Proyecto.findById(req.params.id);
 
-  if(!proyecto){
+  if (!proyecto) {
     const error = new Error("Proyecto No Encontrado");
     return res.status(404).json({ msg: error.message });
   }
 
-  if(proyecto.creador.toString() !== req.usuario._id.toString()){
+  if (proyecto.creador.toString() !== req.usuario._id.toString()) {
     const error = new Error("Acción No Válida");
     return res.status(401).json({ msg: error.message });
   }
